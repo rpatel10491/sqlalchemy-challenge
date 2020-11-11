@@ -8,29 +8,24 @@ from sqlalchemy import create_engine, func, and_
 
 from flask import Flask, jsonify
 
-################################################
-# Database Setup
-#################################################
+
+#Database Setup
 engine = create_engine("sqlite:///Resources/hawaii.sqlite")
 
-# reflect an existing database into a new model
+#reflect an existing database into a new model
 Base = automap_base()
 
-# reflect the tables
+#reflect the tables
 Base.prepare(engine, reflect=True)
 
-# Save reference to the table
+#Save reference to the table
 Measurement = Base.classes.measurement
 Station = Base.classes.station
 
-#################################################
-# Flask Setup
-#################################################
+#Flask Setup
 app = Flask(__name__)
 
-#################################################
-# Flask Routes
-#################################################
+#Flask Routes
 @app.route("/")
 def welcome():
     """List all available api routes."""
@@ -45,14 +40,15 @@ def welcome():
 
 @app.route("/api/v1.0/precipitation")
 def precipitation():
-    # Create our session (link) from Python to the DB
+    
+    #connect to database
     session = Session(engine)
 
-    # Query for the dates and precipitation values
+    #pull data from database
     results =   session.query(Measurement.date, Measurement.prcp).\
                 order_by(Measurement.date).all()
 
-    # Convert to list of dictionaries to jsonify
+    #convert to list of dictionaries to jsonify
     prcp_date_list = []
 
     for date, prcp in results:
@@ -66,12 +62,12 @@ def precipitation():
 
 @app.route("/api/v1.0/stations")
 def stations():
-    # Create our session (link) from Python to the DB
+    #create link from python to db
     session = Session(engine)
 
     stations = {}
 
-    # Query all stations
+    #query all stations
     results = session.query(Station.station, Station.name).all()
     for s,name in results:
         stations[s] = name
@@ -82,20 +78,20 @@ def stations():
 
 @app.route("/api/v1.0/tobs")
 def tobs():
-    # Create our session (link) from Python to the DB
+    #create our session (link) from Python to the DB
     session = Session(engine)
 
-    # Get the last date contained in the dataset and date from one year ago
+    #get dates
     last_date = session.query(Measurement.date).order_by(Measurement.date.desc()).first()
     last_year_date = (dt.datetime.strptime(last_date[0],'%Y-%m-%d') \
                     - dt.timedelta(days=365)).strftime('%Y-%m-%d')
 
-    # Query for the dates and temperature values
+    #query for the dates and temperature values
     results =   session.query(Measurement.date, Measurement.tobs).\
                 filter(Measurement.date >= last_year_date).\
                 order_by(Measurement.date).all()
 
-    # Convert to list of dictionaries to jsonify
+    #convert to list of dictionaries to jsonify
     tobs_date_list = []
 
     for date, tobs in results:
@@ -118,7 +114,7 @@ def temp_range_start(start):
         TMIN, TAVE, and TMAX
     """
 
-    # Create our session (link) from Python to the DB
+    #create link
     session = Session(engine)
 
     return_list = []
@@ -154,7 +150,7 @@ def temp_range_start_end(start,end):
         TMIN, TAVE, and TMAX
     """
 
-    # Create our session (link) from Python to the DB
+    #create link from Python to the DB
     session = Session(engine)
 
     return_list = []
